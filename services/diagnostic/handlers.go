@@ -30,6 +30,7 @@ import (
 	"github.com/influxdata/kapacitor/services/pagerduty2"
 	"github.com/influxdata/kapacitor/services/pushover"
 	"github.com/influxdata/kapacitor/services/sensu"
+	"github.com/influxdata/kapacitor/services/sensugo"
 	"github.com/influxdata/kapacitor/services/sideload"
 	"github.com/influxdata/kapacitor/services/slack"
 	"github.com/influxdata/kapacitor/services/smtp"
@@ -787,6 +788,24 @@ func (h *SensuHandler) WithContext(ctx ...keyvalue.T) sensu.Diagnostic {
 	fields := logFieldsFromContext(ctx)
 
 	return &SensuHandler{
+		l: h.l.With(fields...),
+	}
+}
+
+// Sensu Go handler
+
+type SensuGoHandler struct {
+	l Logger
+}
+
+func (h *SensuGoHandler) Error(msg string, err error, ctx ...keyvalue.T) {
+	Err(h.l, msg, err, ctx)
+}
+
+func (h *SensuGoHandler) WithContext(ctx ...keyvalue.T) sensugo.Diagnostic {
+	fields := logFieldsFromContext(ctx)
+
+	return &SensuGoHandler{
 		l: h.l.With(fields...),
 	}
 }

@@ -346,6 +346,10 @@ type AlertNodeData struct {
 	// tick:ignore
 	SensuHandlers []*SensuHandler `tick:"Sensu" json:"sensu"`
 
+	// Send alert to Sensu Go.
+	// tick:ignore
+	SensuGoHandlers []*SensuGoHandler `tick:"SensuGo" json:"sensuGo"`
+
 	// Send alert to Slack.
 	// tick:ignore
 	SlackHandlers []*SlackHandler `tick:"Slack" json:"slack"`
@@ -1355,6 +1359,71 @@ func (s *SensuHandler) Metadata(key string, value interface{}) *SensuHandler {
 		s.MetadataMap = make(map[string]interface{})
 	}
 	s.MetadataMap[key] = value
+	return s
+}
+
+// Send the alert to Sensu Go.
+//
+// Example:
+//    [sensugo]
+//      enabled = true
+//      url = "https://sensugo.local.domain:8080/api/core/v2/namespaces/default/events"
+//      namespace = "default"
+//      handlers = ["sns","slack"]
+//      token = "Key 45f84411-051e-40ec-aadc-f8acf117882e"
+//
+// Example:
+//    stream
+//         |alert()
+//             .sensuGo()
+//             .label('env', 'test')
+//             .label('key', 'value')
+//             .handlers('test_handler1','test_handler2')
+//
+// tick:property
+func (n *AlertNodeData) SensuGo() *SensuGoHandler {
+	sensugo := &SensuGoHandler{
+		AlertNodeData: n,
+	}
+	n.SensuGoHandlers = append(n.SensuGoHandlers, sensugo)
+	return sensugo
+}
+
+// tick:embedded:AlertNode.SensuGo
+type SensuGoHandler struct {
+	*AlertNodeData `json:"-"`
+
+	// Backend REST API URL
+	URL string `json:"url"`
+
+	// Sensu entity name
+	Entity string `json:"entity"`
+
+	// Sensu Namespace
+	Namespace string `json:"namespace"`
+
+	// Sensu handler list
+	// If empty uses the handler list from the configuration
+	// tick:ignore
+	HandlersList []string `tick:"Handlers" json:"handlers"`
+
+	// LabelMap is a map of arbitrary label keys and their values
+	LabelMap map[string]string `tick:"Label" json:"label"`
+}
+
+// tick:property
+func (s *SensuGoHandler) Handlers(handlers ...string) *SensuGoHandler {
+	s.HandlersList = handlers
+	return s
+}
+
+// Label adds key values pairs to the sensu request.
+// tick:property
+func (s *SensuGoHandler) Label(key string, value string) *SensuGoHandler {
+	if s.LabelMap == nil {
+		s.LabelMap = make(map[string]string)
+	}
+	s.LabelMap[key] = value
 	return s
 }
 
