@@ -60,6 +60,7 @@ func (s *Service) Update(newConfig []interface{}) error {
 type testOptions struct {
 	Check     string            `json:"check"`
 	Entity    string            `json:"entity"`
+	EntityTag string            `json:"entity_tag"`
 	Message   string            `json:"message"`
 	Namespace string            `json:"namespace"`
 	Handlers  []string          `json:"handlers"`
@@ -71,6 +72,7 @@ func (s *Service) TestOptions() interface{} {
 	return &testOptions{
 		Check:     "testName",
 		Entity:    "testEntity",
+		EntityTag: "testEntityTag",
 		Message:   "testMessage",
 		Namespace: "test",
 		Handlers:  []string{},
@@ -197,6 +199,9 @@ type HandlerConfig struct {
 
 	// Entity name in metadata
 	Entity string `mapstructure:"entity"`
+
+	// Tag containing entity name
+	EntityTag string `mapstructure:"entity-tag"`
 }
 
 // Event that is sent over HTTP POST request to sensu-go backend
@@ -237,9 +242,17 @@ func (s *Service) Handler(c HandlerConfig, ctx ...keyvalue.T) (alert.Handler, er
 }
 
 func (h *handler) Handle(event alert.Event) {
+	entity := h.c.Entity
+
+	if h.c.Entity == "" && h.c.EntityTag != "" {
+		if e, ok := event.Data.Tags[h.c.EntityTag]; ok {
+			entity = e
+		}
+	}
+
 	if err := h.s.Alert(
 		event.State.ID,
-		h.c.Entity,
+		entity,
 		event.State.Message,
 		h.c.Namespace,
 		h.c.Handlers,

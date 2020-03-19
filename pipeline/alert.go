@@ -1396,8 +1396,11 @@ type SensuGoHandler struct {
 	// Backend REST API URL
 	URL string `json:"url"`
 
-	// Sensu entity name
+	// Sensu entity name (overrides EntityTag)
 	Entity string `json:"entity"`
+
+	// Name of tag containing Sensu entity name
+	EntityTag string `json:"entityTag"`
 
 	// Sensu Namespace
 	Namespace string `json:"namespace"`

@@ -253,6 +253,7 @@ func newAlertNode(et *ExecutingTask, n *pipeline.AlertNode, d NodeDiagnostic) (a
 		c := sensugo.HandlerConfig{
 			URL:       s.URL,
 			Entity:    s.Entity,
+			EntityTag: s.EntityTag,
 			Namespace: s.Namespace,
 			Handlers:  s.HandlersList,
 			Labels:    s.LabelMap,
