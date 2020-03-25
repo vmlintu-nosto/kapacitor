@@ -1412,6 +1412,9 @@ type SensuGoHandler struct {
 
 	// LabelMap is a map of arbitrary label keys and their values
 	LabelMap map[string]string `tick:"Label" json:"label"`
+
+	// LabelTagsMap is a map of arbitrary label keys that map to tag names
+	LabelTagsMap map[string]string `tick:"LabelTag" json:"labelTag"`
 }
 
 // tick:property

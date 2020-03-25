@@ -65,6 +65,7 @@ type testOptions struct {
 	Namespace string            `json:"namespace"`
 	Handlers  []string          `json:"handlers"`
 	Labels    map[string]string `json:"labels"`
+	LabelTags map[string]string `json:"label_tags"`
 	Level     alert.Level       `json:"level"`
 }
 
@@ -77,6 +78,7 @@ func (s *Service) TestOptions() interface{} {
 		Namespace: "test",
 		Handlers:  []string{},
 		Labels:    make(map[string]string),
+		LabelTags: make(map[string]string),
 		Level:     alert.Critical,
 	}
 }
@@ -190,6 +192,9 @@ type HandlerConfig struct {
 	// Metadata labels is a map of key value data to include on the sensu API request.
 	Labels map[string]string `mapstructure:"labels"`
 
+	// Metadata labels is a map of key value data to include on the sensu API request.
+	LabelTags map[string]string `mapstructure:"label-tags"`
+
 	// Sensu handler list
 	// If empty uses the handler list from the configuration
 	Handlers []string `mapstructure:"handlers"`
@@ -250,13 +255,25 @@ func (h *handler) Handle(event alert.Event) {
 		}
 	}
 
+	labels := make(map[string]string)
+
+	for label, tag := range h.c.LabelTags {
+		if value, ok := event.Data.Tags[tag]; ok {
+			labels[label] = value
+		}
+	}
+
+	for label, value := range h.c.Labels {
+		labels[label] = value
+	}
+
 	if err := h.s.Alert(
 		event.State.ID,
 		entity,
 		event.State.Message,
 		h.c.Namespace,
 		h.c.Handlers,
-		h.c.Labels,
+		labels,
 		event.State.Level,
 	); err != nil {
 		h.diag.Error("failed to send event to Sensu Go", err)

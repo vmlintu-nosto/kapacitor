@@ -257,6 +257,7 @@ func newAlertNode(et *ExecutingTask, n *pipeline.AlertNode, d NodeDiagnostic) (a
 			Namespace: s.Namespace,
 			Handlers:  s.HandlersList,
 			Labels:    s.LabelMap,
+			LabelTags: s.LabelTagsMap,
 		}
 		h, err := et.tm.SensuGoService.Handler(c, ctx...)
 		if err != nil {
