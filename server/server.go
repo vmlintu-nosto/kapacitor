@@ -53,6 +53,7 @@ import (
 	"github.com/influxdata/kapacitor/services/reporting"
 	"github.com/influxdata/kapacitor/services/scraper"
 	"github.com/influxdata/kapacitor/services/sensu"
+	"github.com/influxdata/kapacitor/services/sensugo"
 	"github.com/influxdata/kapacitor/services/serverset"
 	"github.com/influxdata/kapacitor/services/servicetest"
 	"github.com/influxdata/kapacitor/services/sideload"
@@ -260,6 +261,7 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	}
 	s.appendSNMPTrapService()
 	s.appendSensuService()
+	s.appendSensuGoService()
 	s.appendTalkService()
 	s.appendVictorOpsService()
 
@@ -690,6 +692,18 @@ func (s *Server) appendSensuService() {
 
 	s.SetDynamicService("sensu", srv)
 	s.AppendService("sensu", srv)
+}
+
+func (s *Server) appendSensuGoService() {
+	c := s.config.SensuGo
+	d := s.DiagService.NewSensuGoHandler()
+	srv := sensugo.NewService(c, d)
+
+	s.TaskMaster.SensuGoService = srv
+	s.AlertService.SensuGoService = srv
+
+	s.SetDynamicService("sensugo", srv)
+	s.AppendService("sensugo", srv)
 }
 
 func (s *Server) appendSlackService() error {

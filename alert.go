@@ -27,6 +27,7 @@ import (
 	"github.com/influxdata/kapacitor/services/pagerduty2"
 	"github.com/influxdata/kapacitor/services/pushover"
 	"github.com/influxdata/kapacitor/services/sensu"
+	"github.com/influxdata/kapacitor/services/sensugo"
 	"github.com/influxdata/kapacitor/services/slack"
 	"github.com/influxdata/kapacitor/services/smtp"
 	"github.com/influxdata/kapacitor/services/snmptrap"
@@ -242,6 +243,23 @@ func newAlertNode(et *ExecutingTask, n *pipeline.AlertNode, d NodeDiagnostic) (a
 			Metadata: s.MetadataMap,
 		}
 		h, err := et.tm.SensuService.Handler(c, ctx...)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to create sensu alert handler")
+		}
+		an.handlers = append(an.handlers, h)
+	}
+
+	for _, s := range n.SensuGoHandlers {
+		c := sensugo.HandlerConfig{
+			URL:       s.URL,
+			Entity:    s.Entity,
+			EntityTag: s.EntityTag,
+			Namespace: s.Namespace,
+			Handlers:  s.HandlersList,
+			Labels:    s.LabelMap,
+			LabelTags: s.LabelTagsMap,
+		}
+		h, err := et.tm.SensuGoService.Handler(c, ctx...)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to create sensu alert handler")
 		}

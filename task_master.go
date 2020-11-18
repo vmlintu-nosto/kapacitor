@@ -32,6 +32,7 @@ import (
 	"github.com/influxdata/kapacitor/services/pagerduty2"
 	"github.com/influxdata/kapacitor/services/pushover"
 	"github.com/influxdata/kapacitor/services/sensu"
+	"github.com/influxdata/kapacitor/services/sensugo"
 	"github.com/influxdata/kapacitor/services/sideload"
 	"github.com/influxdata/kapacitor/services/slack"
 	"github.com/influxdata/kapacitor/services/smtp"
@@ -177,6 +178,9 @@ type TaskMaster struct {
 	SensuService interface {
 		Handler(sensu.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
 	}
+	SensuGoService interface {
+		Handler(sensugo.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
+	}
 	TalkService interface {
 		Handler(...keyvalue.T) alert.Handler
 	}
@@ -285,6 +289,7 @@ func (tm *TaskMaster) New(id string) *TaskMaster {
 	n.HipChatService = tm.HipChatService
 	n.AlertaService = tm.AlertaService
 	n.SensuService = tm.SensuService
+	n.SensuGoService = tm.SensuGoService
 	n.TalkService = tm.TalkService
 	n.TimingService = tm.TimingService
 	n.K8sService = tm.K8sService

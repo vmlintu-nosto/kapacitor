@@ -42,6 +42,7 @@ import (
 	"github.com/influxdata/kapacitor/services/reporting"
 	"github.com/influxdata/kapacitor/services/scraper"
 	"github.com/influxdata/kapacitor/services/sensu"
+	"github.com/influxdata/kapacitor/services/sensugo"
 	"github.com/influxdata/kapacitor/services/serverset"
 	"github.com/influxdata/kapacitor/services/slack"
 	"github.com/influxdata/kapacitor/services/smtp"
@@ -98,6 +99,7 @@ type Config struct {
 	SMTP       smtp.Config       `toml:"smtp" override:"smtp"`
 	SNMPTrap   snmptrap.Config   `toml:"snmptrap" override:"snmptrap"`
 	Sensu      sensu.Config      `toml:"sensu" override:"sensu"`
+	SensuGo    sensugo.Config    `toml:"sensugo" override:"sensugo"`
 	Slack      slack.Configs     `toml:"slack" override:"slack,element-key=workspace"`
 	Talk       talk.Config       `toml:"talk" override:"talk"`
 	Telegram   telegram.Config   `toml:"telegram" override:"telegram"`
@@ -166,6 +168,7 @@ func NewConfig() *Config {
 	c.HTTPPost = httppost.Configs{httppost.NewConfig()}
 	c.SMTP = smtp.NewConfig()
 	c.Sensu = sensu.NewConfig()
+	c.SensuGo = sensugo.NewConfig()
 	c.Slack = slack.Configs{slack.NewDefaultConfig()}
 	c.Talk = talk.NewConfig()
 	c.SNMPTrap = snmptrap.NewConfig()
@@ -307,6 +310,9 @@ func (c *Config) Validate() error {
 	}
 	if err := c.Sensu.Validate(); err != nil {
 		return errors.Wrap(err, "sensu")
+	}
+	if err := c.SensuGo.Validate(); err != nil {
+		return errors.Wrap(err, "sensugo")
 	}
 	if err := c.Slack.Validate(); err != nil {
 		return errors.Wrap(err, "slack")

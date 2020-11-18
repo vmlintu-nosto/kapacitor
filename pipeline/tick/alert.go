@@ -157,6 +157,24 @@ func (n *AlertNode) Build(a *pipeline.AlertNode) (ast.Node, error) {
 		}
 	}
 
+	for _, h := range a.SensuGoHandlers {
+		n.Dot("sensugo").
+			Dot("name", h.Name).
+			Dot("namespace", h.Namespace).
+			Dot("message", h.Message).
+			Dot("handlers", args(h.HandlersList)...)
+
+		// Use stable key order
+		keys := make([]string, 0, len(h.LabelsMap))
+		for k := range h.LabelMap {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			n.Dot("label", k, h.LabelsMap[k])
+		}
+	}
+
 	for _, h := range a.SlackHandlers {
 		n.Dot("slack").
 			Dot("workspace", h.Workspace).

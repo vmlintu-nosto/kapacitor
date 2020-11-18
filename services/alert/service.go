@@ -25,6 +25,7 @@ import (
 	"github.com/influxdata/kapacitor/services/pagerduty2"
 	"github.com/influxdata/kapacitor/services/pushover"
 	"github.com/influxdata/kapacitor/services/sensu"
+	"github.com/influxdata/kapacitor/services/sensugo"
 	"github.com/influxdata/kapacitor/services/slack"
 	"github.com/influxdata/kapacitor/services/smtp"
 	"github.com/influxdata/kapacitor/services/snmptrap"
@@ -113,6 +114,9 @@ type Service struct {
 	}
 	SensuService interface {
 		Handler(sensu.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
+	}
+	SensuGoService interface {
+		Handler(sensugo.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
 	}
 	SlackService interface {
 		Handler(slack.HandlerConfig, ...keyvalue.T) alert.Handler
@@ -898,6 +902,17 @@ func (s *Service) createHandlerFromSpec(spec HandlerSpec) (handler, error) {
 			return handler{}, err
 		}
 		h, err = s.SensuService.Handler(c, ctx...)
+		if err != nil {
+			return handler{}, err
+		}
+		h = newExternalHandler(h)
+	case "sensugo":
+		c := sensugo.HandlerConfig{}
+		err = decodeOptions(spec.Options, &c)
+		if err != nil {
+			return handler{}, err
+		}
+		h, err = s.SensuGoService.Handler(c, ctx...)
 		if err != nil {
 			return handler{}, err
 		}

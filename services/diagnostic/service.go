@@ -255,6 +255,12 @@ func (s *Service) NewSensuHandler() *SensuHandler {
 	}
 }
 
+func (s *Service) NewSensuGoHandler() *SensuGoHandler {
+	return &SensuGoHandler{
+		l: s.Logger.With(String("service", "sensugo")),
+	}
+}
+
 func (s *Service) NewSNMPTrapHandler() *SNMPTrapHandler {
 	return &SNMPTrapHandler{
 		l: s.Logger.With(String("service", "snmp")),

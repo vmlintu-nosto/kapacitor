@@ -470,6 +470,30 @@ func TestAlertSensu(t *testing.T) {
 	PipelineTickTestHelper(t, pipe, want)
 }
 
+func TestAlertSensuGo(t *testing.T) {
+	pipe, _, from := StreamFrom()
+	handler := from.Alert().SensuGo()
+	handler.Handlers("FBI", "Witness", "Protection")
+	handler.LabelMap = map[string]interface{}{
+		"env":  "test",
+		"role": "testrole",
+	}
+
+	want := `stream
+    |from()
+    |alert()
+        .id('{{ .Name }}:{{ .Group }}')
+        .message('{{ .ID }} is {{ .Level }}')
+        .details('{{ json . }}')
+        .history(21)
+        .sensu()
+        .handlers('FBI', 'Witness', 'Protection')
+				.label('env', 'test')
+				.label('role', 'testrole')
+`
+	PipelineTickTestHelper(t, pipe, want)
+}
+
 func TestAlertSlack(t *testing.T) {
 	pipe, _, from := StreamFrom()
 	handler := from.Alert().Slack()
