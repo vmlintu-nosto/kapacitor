@@ -173,6 +173,16 @@ func (n *AlertNode) Build(a *pipeline.AlertNode) (ast.Node, error) {
 		for _, k := range keys {
 			n.Dot("label", k, h.LabelsMap[k])
 		}
+
+		// labelTags
+		keys := make([]string, 0, len(h.LabelTagsMap))
+		for k := range h.LabelTagsMap {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			n.Dot("labelTag", k, h.LabelTagsMap[k])
+		}
 	}
 
 	for _, h := range a.SlackHandlers {

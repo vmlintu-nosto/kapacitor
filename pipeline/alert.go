@@ -1433,6 +1433,15 @@ func (s *SensuGoHandler) Label(key string, value string) *SensuGoHandler {
 	return s
 }
 
+// Label adds key values pairs to the sensu request.
+// tick:property
+func (s *SensuGoHandler) LabelTag(key string, value string) *SensuGoHandler {
+	if s.LabelTagsMap == nil {
+		s.LabelTagsMap = make(map[string]string)
+	}
+	s.LabelTagsMap[key] = value
+	return s
+}
 // Send the alert to Pushover.
 // Register your application with Pushover at
 // https://pushover.net/apps/build to get a
